@@ -73,12 +73,14 @@ export default function Home() {
     onSessionComplete: handleSessionComplete,
   });
 
+  const hasChoices = Boolean(question && Array.isArray((question as any).choices) && (question as any).choices.length > 0);
+
   useEffect(() => {
-    if (screen !== "drill" || useKeypad || answered) {
+    if (screen !== "drill" || useKeypad || answered || hasChoices) {
       return;
     }
     inputRef.current?.focus();
-  }, [answered, question?.id, screen, useKeypad]);
+  }, [answered, hasChoices, question?.id, screen, useKeypad]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -126,19 +128,12 @@ export default function Home() {
     ? provider.skills[weakestSkill].label
     : copy.stats.noData;
 
-  const negativeControl = provider.settings.controls.find(
-    (control) => control.id === "negativeLevel"
+  const inputModeControl = provider.settings.controls.find(
+    (control) => control.id === "inputMode"
   );
-  const negativeValue = negativeControl
-    ? negativeControl.getValue(settings)
-    : null;
-  const negativeText =
-    negativeControl && typeof negativeValue === "number"
-      ? negativeControl.formatValue
-        ? negativeControl.formatValue(negativeValue, settings)
-        : negativeValue === 0
-          ? copy.menu.negativesOff
-          : copy.menu.negativesFormat(negativeValue)
+  const inputModeText =
+    inputModeControl && inputModeControl.formatValue
+      ? inputModeControl.formatValue(inputModeControl.getValue(settings), settings)
       : null;
 
   const mixModeLabel =
@@ -201,31 +196,50 @@ export default function Home() {
                 {copy.menu.weakestPrefix} {weaknessText}
               </span>
             </div>
-            {negativeText ? (
+            {inputModeText ? (
               <div className={styles.metaBadge}>
                 <span className={styles.metaBadgeText}>
-                  {copy.menu.negativesLabel} {negativeText}
+                  {copy.menu.inputModeLabel} {inputModeText}
                 </span>
               </div>
             ) : null}
           </div>
+          <p className={styles.heroText}>{copy.menu.unlockNote}</p>
         </section>
 
         <div className={styles.menuGrid}>
-          {modes.map((item) => (
-            <button
-              key={item.key}
-              onClick={() => startSession(item.key)}
-              type="button"
-              className={styles.menuButton}
-            >
-              <span className={styles.menuIcon}>{item.icon}</span>
-              <span>
-                <span className={styles.menuLabel}>{item.label}</span>
-                <span className={styles.menuSub}>{item.subtitle}</span>
-              </span>
-            </button>
-          ))}
+          {modes.map((item) => {
+            const skillKey = item.key === "mix" ? provider.skillOrder[0] : item.key;
+            const unlocked =
+              item.key === "mix"
+                ? true
+                : provider.isSkillUnlocked
+                  ? provider.isSkillUnlocked({
+                      skill: skillKey as (typeof provider.skillOrder)[number],
+                      stats,
+                    })
+                  : true;
+            return (
+              <button
+                key={item.key}
+                onClick={() => startSession(item.key)}
+                type="button"
+                disabled={!unlocked}
+                className={`${styles.menuButton} ${
+                  !unlocked ? styles.menuButtonDisabled : ""
+                }`}
+              >
+                <span className={styles.menuIcon}>{item.icon}</span>
+                <span>
+                  <span className={styles.menuLabel}>{item.label}</span>
+                  <span className={styles.menuSub}>
+                    {item.subtitle}
+                    {!unlocked ? " (locked)" : ""}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         <div className={styles.menuActions}>
@@ -292,9 +306,29 @@ export default function Home() {
               <div className={styles.questionText}>
                 {provider.getQuestionText(question)}
               </div>
+              {"display" in question ? (
+                <div className={styles.promptDisplay}>{(question as any).display}</div>
+              ) : null}
 
               <div className={styles.answerBlock}>
-                {useKeypad && keypadRows ? (
+                {hasChoices ? (
+                  <div className={styles.choiceGrid}>
+                    {(question as any).choices?.map((choice: string) => (
+                      <button
+                        key={choice}
+                        type="button"
+                        onClick={() => {
+                          handleAnswerChange(choice);
+                          handleSubmit({ valueOverride: choice });
+                        }}
+                        disabled={answered}
+                        className={`${styles.choiceButton} ${answered ? styles.buttonDisabled : ""}`}
+                      >
+                        {choice}
+                      </button>
+                    ))}
+                  </div>
+                ) : useKeypad && keypadRows ? (
                   <>
                     <div className={styles.answerDisplay}>
                       <span
@@ -375,9 +409,9 @@ export default function Home() {
                     onClick={() =>
                       handleSubmit({ useKeypad: Boolean(useKeypad && keypadRows) })
                     }
-                    disabled={answered}
+                    disabled={answered || hasChoices}
                     className={`${styles.primaryButton} ${
-                      answered ? styles.buttonDisabled : ""
+                      answered || hasChoices ? styles.buttonDisabled : ""
                     }`}
                   >
                     {copy.drill.checkAction}
@@ -654,6 +688,7 @@ export default function Home() {
           type="button"
           onClick={resetStats}
           className={styles.dangerButton}
+          style={{ marginBottom: "1rem" }}
         >
           {copy.settings.resetStats}
         </button>
@@ -706,7 +741,7 @@ export default function Home() {
 
       <main className={styles.main}>
         {content}
-        {inlineAdConfig.enabled ? (
+        {inlineAdConfig.enabled && screen === "summary" ? (
           <InlineScriptAdSlot
             config={inlineAdConfig}
             className={styles.adSlot}

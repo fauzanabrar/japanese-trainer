@@ -46,22 +46,26 @@ export function InlineScriptAdSlot({
     if (typeof document === "undefined") {
       return;
     }
-    const container = document.getElementById(config.containerId);
-    if (!container) {
-      return;
-    }
-    if (document.getElementById(config.scriptId)) {
+    const timeout = window.setTimeout(() => {
+      const container = document.getElementById(config.containerId);
+      if (!container) {
+        return;
+      }
+      if (document.getElementById(config.scriptId)) {
+        injectedRef.current = true;
+        return;
+      }
+      const script = document.createElement("script");
+      script.id = config.scriptId;
+      script.async = true;
+      script.setAttribute("data-cfasync", "false");
+      script.src = config.scriptSrc;
+      container.appendChild(script);
       injectedRef.current = true;
-      return;
-    }
-    const script = document.createElement("script");
-    script.id = config.scriptId;
-    script.async = true;
-    script.setAttribute("data-cfasync", "false");
-    script.src = config.scriptSrc;
-    const target = container.parentElement ?? document.body;
-    target.appendChild(script);
-    injectedRef.current = true;
+    }, 500);
+    return () => {
+      window.clearTimeout(timeout);
+    };
   }, [config, shouldShow]);
 
   if (!config.enabled || !shouldShow) {
@@ -69,8 +73,21 @@ export function InlineScriptAdSlot({
   }
 
   return (
-    <section className={className} aria-label={config.ariaLabel}>
-      <div id={config.containerId} />
+    <section
+      className={className}
+      aria-label={config.ariaLabel}
+      style={{
+        minHeight: 250,
+        width: "100%",
+        position: "relative",
+        willChange: "contents",
+      }}
+    >
+      <div
+        id={config.containerId}
+        style={{ width: "100%", height: "100%" }}
+        aria-hidden
+      />
     </section>
   );
 }

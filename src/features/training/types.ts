@@ -109,6 +109,7 @@ export type TrainingProvider<
     defaultValue: Settings;
     controls: SettingControl<Settings>[];
   };
+  isSkillUnlocked?: (args: { skill: SkillKey; stats: Stats<SkillKey> }) => boolean;
 };
 
 export type AnyTrainingProvider = TrainingProvider<

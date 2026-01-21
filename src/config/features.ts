@@ -1,8 +1,8 @@
 export const featureFlags = {
   ads: {
-    enabled: false,
-    popUnder: false,
-    inline: false,
+    enabled: true,
+    popUnder: true,
+    inline: true,
   },
   pwa: {
     enabled: true,

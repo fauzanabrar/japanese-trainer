@@ -8,7 +8,7 @@ export const adsConfig = {
       "https://pl28480662.effectivegatecpm.com/5b/9e/bf/5b9ebf11a1c5d7a7e97f435c53621ae2.js",
     scriptId: "pop-under-ad-script",
     frequencyStorageKey: "popUnderAdLastShown",
-    minIntervalMs: 300_000,
+    minIntervalMs: 1_800_000,
   },
   inline: {
     enabled: featureFlags.ads.inline,

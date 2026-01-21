@@ -1,7 +1,7 @@
 import { appConfig } from "./app";
-import { mathTrainingProvider } from "@/features/training/providers/mathTrainingProvider";
+import { japaneseTrainingProvider } from "@/features/training/providers/japaneseTrainingProvider";
 
-type ProviderSkillKey = keyof typeof mathTrainingProvider.skills;
+type ProviderSkillKey = keyof typeof japaneseTrainingProvider.skills;
 type TrainingModeKey = ProviderSkillKey | "mix";
 
 const storagePrefix = appConfig.storagePrefix;
@@ -23,15 +23,15 @@ const skillModes: Array<{
   label: string;
   subtitle: string;
   icon: string;
-}> = mathTrainingProvider.skillOrder.map((skill) => ({
+}> = japaneseTrainingProvider.skillOrder.map((skill) => ({
   key: skill,
-  label: mathTrainingProvider.skills[skill].label,
-  subtitle: mathTrainingProvider.skills[skill].subtitle,
-  icon: mathTrainingProvider.skills[skill].symbol,
+  label: japaneseTrainingProvider.skills[skill].label,
+  subtitle: japaneseTrainingProvider.skills[skill].subtitle,
+  icon: japaneseTrainingProvider.skills[skill].symbol,
 }));
 
 export const trainingConfig = {
-  provider: mathTrainingProvider,
+  provider: japaneseTrainingProvider,
   storageKeys: {
     session: `${storagePrefix}:session`,
     settings: `${storagePrefix}:settings`,
@@ -49,26 +49,25 @@ export const trainingConfig = {
       shortName: appConfig.shortName,
     },
     menu: {
-      title: "Choose a drill",
+      title: "Choose a practice",
       description:
-        "Pick a focus or use Random mix to adapt to your weakest skill.",
+        "Start with kana, then unlock kanji and vocabulary as you improve.",
       statsAction: "Statistics",
       settingsAction: "Settings",
       questionsSuffix: "questions",
       timeSuffix: "s per question",
       weakestPrefix: "Weakest:",
-      negativesLabel: "Negatives:",
-      negativesOff: "Off",
-      negativesFormat: (value: number) => `Lvl ${value}+`,
+      inputModeLabel: "Input mode:",
+      unlockNote: "Unlock higher levels with 70% accuracy and 80% coverage.",
     },
     drill: {
-      subtitle: "Answer fast and correct to level up.",
+      subtitle: "Answer quickly and accurately to level up.",
       questionLabel: "Question",
       timeLabel: "Time",
       skillLabel: "Category",
       levelLabel: "Level",
       targetLabel: "Target",
-      answerPlaceholder: "Type your answer",
+      answerPlaceholder: "Type romaji, kana, or choose",
       answerPlaceholderKeypad: "Tap to answer",
       checkAction: "Check",
       nextAction: "Next",
@@ -79,7 +78,7 @@ export const trainingConfig = {
     stats: {
       title: "Statistics",
       intro:
-        "Recent performance across your drills (last 12 attempts per skill).",
+        "Recent performance across your drills (last 100 attempts per skill).",
       overallTitle: "Overall",
       overallIntro: "Based on your recent attempts across all skills.",
       accuracyLabel: "Accuracy",
@@ -98,7 +97,7 @@ export const trainingConfig = {
     },
     settings: {
       title: "Settings",
-      intro: "Tune the session size and time per question.",
+      intro: "Tune the session size, time, and input style.",
       themeLabel: "Theme",
       themeLight: "Light",
       themeDark: "Dark",

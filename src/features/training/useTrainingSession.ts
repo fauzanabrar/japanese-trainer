@@ -244,13 +244,14 @@ export const useTrainingSession = <
     [provider, question]
   );
 
-  const handleSubmit = useCallback((options?: { useKeypad?: boolean }) => {
+  const handleSubmit = useCallback((options?: { useKeypad?: boolean; valueOverride?: string }) => {
     if (!question || answered) {
       return;
     }
     const prefersKeypadErrors = Boolean(options?.useKeypad);
     const allowNegative = allowNegativeAnswer;
-    const cleaned = provider.answer.sanitizeInput(answer.trim(), {
+    const rawValue = options?.valueOverride ?? answer;
+    const cleaned = provider.answer.sanitizeInput(rawValue.trim(), {
       allowNegative,
     });
     const parsed = provider.answer.parseInput(cleaned, { allowNegative });

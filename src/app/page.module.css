@@ -170,6 +170,11 @@ button:focus-visible {
   transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
+.menuButtonDisabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .menuButton:hover {
   border-color: var(--accent);
 }
@@ -327,10 +332,39 @@ button:focus-visible {
   color: var(--ink);
 }
 
+.promptDisplay {
+  font-size: clamp(2.6rem, 6vw, 3.2rem);
+  text-align: center;
+  font-weight: 800;
+  color: var(--ink-strong);
+  padding: 6px 0;
+}
+
 .answerBlock {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.choiceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.choiceButton {
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--card);
+  font-weight: 700;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.choiceButton:active {
+  transform: translateY(1px);
 }
 
 .answerRow {
