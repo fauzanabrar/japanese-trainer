@@ -376,6 +376,7 @@ const createKanaQuestion = (
     answer: entry.romaji,
     acceptable,
     choices,
+    reading: entry.romaji,
     inputType: choices ? "choice" : "text",
   };
 };
@@ -398,8 +399,8 @@ const createKanjiQuestion = (
   const choices = useChoices
     ? maybeShuffle(
         buildChoices(
-          entry.kanji,
-          contentCache.kanji.map((k) => k.kanji)
+          entry.reading,
+          contentCache.kanji.map((k) => k.reading)
         )
       )
     : undefined;
@@ -429,8 +430,8 @@ const createVocabQuestion = (
   const choices = useChoices
     ? maybeShuffle(
         buildChoices(
-          entry.term,
-          contentCache.vocab.map((v) => v.term)
+          entry.meaning,
+          contentCache.vocab.map((v) => v.meaning)
         )
       )
     : undefined;
@@ -467,8 +468,11 @@ const isCorrect = (value: string, question: JapaneseQuestion): boolean => {
 };
 
 const formatExpected = (question: JapaneseQuestion) => {
+  if (question.reading && question.meaning) {
+    return `${question.display} = ${question.reading} (${question.meaning})`;
+  }
   if (question.reading) {
-    return `${question.display} = ${question.reading}${question.meaning ? ` (${question.meaning})` : ""}`;
+    return `${question.display} = ${question.reading}`;
   }
   return question.display;
 };

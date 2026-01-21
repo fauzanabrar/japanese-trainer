@@ -400,7 +400,7 @@ export default function Home() {
                         handleAnswerChange(event.target.value);
                       }}
                       onKeyDown={(event) => {
-                        if (event.key === "Enter") {
+                        if (event.key === "Enter" && !answered) {
                           event.preventDefault();
                           handleSubmit();
                         }
@@ -413,28 +413,26 @@ export default function Home() {
                   </div>
                 )}
                 <div className={styles.actionRow}>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleSubmit({ useKeypad: Boolean(useKeypad && keypadRows) })
-                    }
-                    disabled={answered || hasChoices}
-                    className={`${styles.primaryButton} ${
-                      answered || hasChoices ? styles.buttonDisabled : ""
-                    }`}
-                  >
-                    {copy.drill.checkAction}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    disabled={!answered}
-                    className={`${styles.secondaryButton} ${
-                      !answered ? styles.buttonDisabled : ""
-                    }`}
-                  >
-                    {copy.drill.nextAction}
-                  </button>
+                  {!answered && !hasChoices && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleSubmit({ useKeypad: Boolean(useKeypad && keypadRows) })
+                      }
+                      className={styles.primaryButton}
+                    >
+                      {copy.drill.checkAction}
+                    </button>
+                  )}
+                  {answered && (
+                    <button
+                      type="button"
+                      onClick={handleNext}
+                      className={styles.primaryButton}
+                    >
+                      {copy.drill.nextAction}
+                    </button>
+                  )}
                 </div>
               </div>
 
