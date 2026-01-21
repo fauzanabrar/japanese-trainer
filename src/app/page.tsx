@@ -29,6 +29,7 @@ const popUnderEnabled = adsConfig.enabled && adsConfig.popUnder.enabled;
 export default function Home() {
   const { provider, modes, storageKeys, copy } = trainingConfig;
   const inputRef = useRef<HTMLInputElement>(null);
+  const [mounted, setMounted] = useState(false);
   const [useKeypad] = useState(() => {
     if (typeof navigator === "undefined") {
       return false;
@@ -37,6 +38,10 @@ export default function Home() {
   });
 
   const { theme, toggleTheme } = useThemeMode(storageKeys.theme);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSessionComplete = useCallback(() => {
     if (popUnderEnabled) {
@@ -179,32 +184,36 @@ export default function Home() {
         <section className={styles.hero}>
           <h1 className={styles.heroTitle}>{copy.menu.title}</h1>
           <p className={styles.heroText}>{copy.menu.description}</p>
-          <div className={styles.menuMetaRow}>
-            <div className={styles.metaBadge}>
-              <span className={styles.metaBadgeText}>
-                {settings.questionCount} {copy.menu.questionsSuffix}
-              </span>
-            </div>
-            <div className={styles.metaBadge}>
-              <span className={styles.metaBadgeText}>
-                {settings.timeLimitSeconds}
-                {copy.menu.timeSuffix}
-              </span>
-            </div>
-            <div className={styles.metaBadge}>
-              <span className={styles.metaBadgeText}>
-                {copy.menu.weakestPrefix} {weaknessText}
-              </span>
-            </div>
-            {inputModeText ? (
-              <div className={styles.metaBadge}>
-                <span className={styles.metaBadgeText}>
-                  {copy.menu.inputModeLabel} {inputModeText}
-                </span>
+          {mounted ? (
+            <>
+              <div className={styles.menuMetaRow}>
+                <div className={styles.metaBadge}>
+                  <span className={styles.metaBadgeText}>
+                    {settings.questionCount} {copy.menu.questionsSuffix}
+                  </span>
+                </div>
+                <div className={styles.metaBadge}>
+                  <span className={styles.metaBadgeText}>
+                    {settings.timeLimitSeconds}
+                    {copy.menu.timeSuffix}
+                  </span>
+                </div>
+                <div className={styles.metaBadge}>
+                  <span className={styles.metaBadgeText}>
+                    {copy.menu.weakestPrefix} {weaknessText}
+                  </span>
+                </div>
+                {inputModeText ? (
+                  <div className={styles.metaBadge}>
+                    <span className={styles.metaBadgeText}>
+                      {copy.menu.inputModeLabel} {inputModeText}
+                    </span>
+                  </div>
+                ) : null}
               </div>
-            ) : null}
-          </div>
-          <p className={styles.heroText}>{copy.menu.unlockNote}</p>
+              <p className={styles.heroText}>{copy.menu.unlockNote}</p>
+            </>
+          ) : null}
         </section>
 
         <div className={styles.menuGrid}>

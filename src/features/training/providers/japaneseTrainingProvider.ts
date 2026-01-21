@@ -78,7 +78,7 @@ const SKILL_DEFINITIONS = {
 } satisfies Record<JapaneseSkillKey, { label: string; symbol: string; subtitle: string }>;
 
 const DEFAULT_SETTINGS: JapaneseSettings = {
-  questionCount: 15,
+  questionCount: 20,
   timeLimitSeconds: 12,
   inputMode: "auto",
 };
@@ -90,14 +90,14 @@ const settingControls: SettingControl<JapaneseSettings>[] = [
   {
     id: "questionCount",
     label: "Questions per session",
-    hint: "Default is 10",
+    hint: "Default is 20",
     min: 5,
-    max: 30,
+    max: 50,
     step: 1,
     getValue: (settings) => settings.questionCount,
     setValue: (settings, value) => ({
       ...settings,
-      questionCount: clampValue(value, 5, 30),
+      questionCount: clampValue(value, 5, 50),
     }),
   },
   {
@@ -240,9 +240,7 @@ const buildChoices = (
 ): string[] => {
   const set = new Set<string>();
   set.add(correct);
-  const candidates = confusion
-    ?.map((id) => pool.find((p) => p === id))
-    .filter(Boolean) as string[];
+  const candidates = confusion ?? [];
   const fallback = pool.filter((p) => p !== correct);
   [...candidates, ...fallback].some((choice) => {
     if (set.size >= 4) {
