@@ -9,6 +9,8 @@ export type InlineScriptAdConfig = {
   scriptId: string;
   scriptSrc: string;
   sessionStorageKey?: string;
+  /** Minimum interval in ms between injections; prevents frequent refreshes. */
+  minIntervalMs?: number;
   ariaLabel?: string;
 };
 
@@ -17,10 +19,7 @@ type InlineScriptAdSlotProps = {
   className?: string;
 };
 
-export function InlineScriptAdSlot({
-  config,
-  className,
-}: InlineScriptAdSlotProps) {
+export function InlineScriptAdSlot({ config, className }: InlineScriptAdSlotProps) {
   const injectedRef = useRef(false);
   const [shouldShow] = useState(() => {
     if (!config.enabled) {
@@ -29,14 +28,29 @@ export function InlineScriptAdSlot({
     if (!config.sessionStorageKey) {
       return true;
     }
-    return !storage.readSession(config.sessionStorageKey);
+
+    const lastShownRaw = storage.readSession(config.sessionStorageKey);
+    const lastShown = lastShownRaw ? Number(lastShownRaw) : undefined;
+    const hasInterval =
+      typeof config.minIntervalMs === "number" && config.minIntervalMs > 0;
+
+    if (!lastShown || Number.isNaN(lastShown)) {
+      return true;
+    }
+
+    if (!hasInterval) {
+      // Only block once per session when no interval is provided
+      return false;
+    }
+
+    return Date.now() - lastShown >= config.minIntervalMs!;
   });
 
   useEffect(() => {
     if (!shouldShow || !config.sessionStorageKey) {
       return;
     }
-    storage.writeSession(config.sessionStorageKey, "true");
+    storage.writeSession(config.sessionStorageKey, Date.now().toString());
   }, [config.sessionStorageKey, shouldShow]);
 
   useEffect(() => {

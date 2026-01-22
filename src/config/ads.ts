@@ -17,7 +17,8 @@ export const adsConfig = {
     scriptId: "native-banner-8ae2682a00f7b4b2790fcf59a39a2936",
     scriptSrc:
       "https://pl28537967.effectivegatecpm.com/8ae2682a00f7b4b2790fcf59a39a2936/invoke.js",
-    sessionStorageKey: "nativeBannerShown",
+    sessionStorageKey: "nativeBannerLastShown",
+    minIntervalMs: 300_000, // 5 minutes between injections
     ariaLabel: "Sponsored content",
   },
 };
