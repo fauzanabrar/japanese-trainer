@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
   },
+  // Static export for Netlify compatibility
+  output: "export",
 };
 
 export default nextConfig;

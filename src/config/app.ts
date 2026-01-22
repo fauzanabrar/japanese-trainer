@@ -3,7 +3,9 @@ export const appConfig = {
   shortName: "JP",
   description:
     "Adaptive Japanese practice (kana, kanji, vocab) with deliberate practice and offline support.",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://example.com",
+  // Public site URL for sitemap/robots and metadata
+  url:
+    process.env.NEXT_PUBLIC_SITE_URL || "https://japanesetrainer.netlify.app",
   themeColor: "#ff6b35",
   locale: "en-US",
   author: "Your Team",

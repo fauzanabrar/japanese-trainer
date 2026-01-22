@@ -12,11 +12,12 @@ export const adsConfig = {
   },
   inline: {
     enabled: featureFlags.ads.inline,
-    containerId: "container-9c9ea4fbff8dd33e714120c2cb2ec0d5",
-    scriptId: "adsterra-native-9c9ea4fbff8dd33e714120c2cb2ec0d5",
+    // Native banner; session-gated to avoid frequent impressions
+    containerId: "container-8ae2682a00f7b4b2790fcf59a39a2936",
+    scriptId: "native-banner-8ae2682a00f7b4b2790fcf59a39a2936",
     scriptSrc:
-      "https://pl28463616.effectivegatecpm.com/9c9ea4fbff8dd33e714120c2cb2ec0d5/invoke.js",
-    sessionStorageKey: "inlineAdShown",
+      "https://pl28537967.effectivegatecpm.com/8ae2682a00f7b4b2790fcf59a39a2936/invoke.js",
+    sessionStorageKey: "nativeBannerShown",
     ariaLabel: "Sponsored content",
   },
 };
