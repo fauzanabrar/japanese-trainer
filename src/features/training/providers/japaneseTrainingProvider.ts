@@ -3,6 +3,14 @@ import { normalizeAnswer, toHiragana, kanaToRomaji } from "@/lib/romaji-converte
 import { hiragana, katakana } from "@/lib/japanese-data/kana";
 import { n5Kanji } from "@/lib/japanese-data/n5-kanji";
 import { n5Vocab } from "@/lib/japanese-data/n5-vocab";
+import { n4Kanji } from "@/lib/japanese-data/n4-kanji";
+import { n4Vocab } from "@/lib/japanese-data/n4-vocab";
+import { n3Kanji } from "@/lib/japanese-data/n3-kanji";
+import { n3Vocab } from "@/lib/japanese-data/n3-vocab";
+import { n2Kanji } from "@/lib/japanese-data/n2-kanji";
+import { n2Vocab } from "@/lib/japanese-data/n2-vocab";
+import { n1Kanji } from "@/lib/japanese-data/n1-kanji";
+import { n1Vocab } from "@/lib/japanese-data/n1-vocab";
 import type {
   AnswerParseResult,
   SettingControl,
@@ -21,7 +29,15 @@ export type JapaneseSkillKey =
   | "hiragana"
   | "katakana"
   | "kanji-n5"
-  | "vocab-n5";
+  | "vocab-n5"
+  | "kanji-n4"
+  | "vocab-n4"
+  | "kanji-n3"
+  | "vocab-n3"
+  | "kanji-n2"
+  | "vocab-n2"
+  | "kanji-n1"
+  | "vocab-n1";
 
 export type InputModeSetting = "auto" | "multiple-choice" | "typing";
 
@@ -52,6 +68,14 @@ const SKILL_ORDER: JapaneseSkillKey[] = [
   "katakana",
   "kanji-n5",
   "vocab-n5",
+  "kanji-n4",
+  "vocab-n4",
+  "kanji-n3",
+  "vocab-n3",
+  "kanji-n2",
+  "vocab-n2",
+  "kanji-n1",
+  "vocab-n1",
 ];
 
 const SKILL_DEFINITIONS = {
@@ -74,6 +98,46 @@ const SKILL_DEFINITIONS = {
     label: "Vocab N5",
     symbol: "語",
     subtitle: "Everyday words",
+  },
+  "kanji-n4": {
+    label: "Kanji N4",
+    symbol: "知",
+    subtitle: "Basic kanji",
+  },
+  "vocab-n4": {
+    label: "Vocab N4",
+    symbol: "話",
+    subtitle: "Common verbs",
+  },
+  "kanji-n3": {
+    label: "Kanji N3",
+    symbol: "悲",
+    subtitle: "Intermediate kanji",
+  },
+  "vocab-n3": {
+    label: "Vocab N3",
+    symbol: "感",
+    subtitle: "Abstract terms",
+  },
+  "kanji-n2": {
+    label: "Kanji N2",
+    symbol: "競",
+    subtitle: "Advanced kanji",
+  },
+  "vocab-n2": {
+    label: "Vocab N2",
+    symbol: "研",
+    subtitle: "Academic vocab",
+  },
+  "kanji-n1": {
+    label: "Kanji N1",
+    symbol: "規",
+    subtitle: "Expert kanji",
+  },
+  "vocab-n1": {
+    label: "Vocab N1",
+    symbol: "則",
+    subtitle: "Professional vocab",
   },
 } satisfies Record<JapaneseSkillKey, { label: string; symbol: string; subtitle: string }>;
 
@@ -289,6 +353,14 @@ const prerequisites: Record<JapaneseSkillKey, JapaneseSkillKey[] | null> = {
   katakana: null,
   "kanji-n5": null,
   "vocab-n5": null,
+  "kanji-n4": ["kanji-n5"],
+  "vocab-n4": ["vocab-n5"],
+  "kanji-n3": ["kanji-n4"],
+  "vocab-n3": ["vocab-n4"],
+  "kanji-n2": ["kanji-n3"],
+  "vocab-n2": ["vocab-n3"],
+  "kanji-n1": ["kanji-n2"],
+  "vocab-n1": ["vocab-n2"],
 };
 
 const isSkillUnlocked = ({
@@ -309,15 +381,23 @@ const isSkillUnlocked = ({
 const contentCache = {
   hiragana,
   katakana,
-  kanji: n5Kanji,
-  vocab: n5Vocab,
+  kanjiN5: n5Kanji,
+  vocabN5: n5Vocab,
+  kanjiN4: n4Kanji,
+  vocabN4: n4Vocab,
+  kanjiN3: n3Kanji,
+  vocabN3: n3Vocab,
+  kanjiN2: n2Kanji,
+  vocabN2: n2Vocab,
+  kanjiN1: n1Kanji,
+  vocabN1: n1Vocab,
 };
 
 const warmContent = async () => {
   try {
     await japaneseDb.seedStore("kana", [...hiragana, ...katakana]);
-    await japaneseDb.seedStore("kanji", n5Kanji);
-    await japaneseDb.seedStore("vocab", n5Vocab);
+    await japaneseDb.seedStore("kanji", [...n5Kanji, ...n4Kanji, ...n3Kanji, ...n2Kanji, ...n1Kanji]);
+    await japaneseDb.seedStore("vocab", [...n5Vocab, ...n4Vocab, ...n3Vocab, ...n2Vocab, ...n1Vocab]);
     const [kana, kanji, vocab] = await Promise.all([
       japaneseDb.readAll("kana"),
       japaneseDb.readAll("kanji"),
@@ -328,10 +408,19 @@ const warmContent = async () => {
       contentCache.katakana = kana.filter((k) => k.script === "katakana");
     }
     if (kanji.length) {
-      contentCache.kanji = kanji;
+      // Split kanji by JLPT level (kanji should have level 1-5, repeated across sets)
+      contentCache.kanjiN5 = kanji.slice(0, n5Kanji.length);
+      contentCache.kanjiN4 = kanji.slice(n5Kanji.length, n5Kanji.length + n4Kanji.length);
+      contentCache.kanjiN3 = kanji.slice(n5Kanji.length + n4Kanji.length, n5Kanji.length + n4Kanji.length + n3Kanji.length);
+      contentCache.kanjiN2 = kanji.slice(n5Kanji.length + n4Kanji.length + n3Kanji.length, n5Kanji.length + n4Kanji.length + n3Kanji.length + n2Kanji.length);
+      contentCache.kanjiN1 = kanji.slice(n5Kanji.length + n4Kanji.length + n3Kanji.length + n2Kanji.length);
     }
     if (vocab.length) {
-      contentCache.vocab = vocab;
+      contentCache.vocabN5 = vocab.slice(0, n5Vocab.length);
+      contentCache.vocabN4 = vocab.slice(n5Vocab.length, n5Vocab.length + n4Vocab.length);
+      contentCache.vocabN3 = vocab.slice(n5Vocab.length + n4Vocab.length, n5Vocab.length + n4Vocab.length + n3Vocab.length);
+      contentCache.vocabN2 = vocab.slice(n5Vocab.length + n4Vocab.length + n3Vocab.length, n5Vocab.length + n4Vocab.length + n3Vocab.length + n2Vocab.length);
+      contentCache.vocabN1 = vocab.slice(n5Vocab.length + n4Vocab.length + n3Vocab.length + n2Vocab.length);
     }
   } catch (err) {
     // Swallow errors; fallback to bundled seeds.
@@ -390,24 +479,33 @@ const pickByLevel = <T extends { level: number }>(items: T[], level: number) => 
 };
 
 const createKanjiQuestion = (
+  skill: "kanji-n5" | "kanji-n4" | "kanji-n3" | "kanji-n2" | "kanji-n1",
   level: number,
   settings: JapaneseSettings
 ): JapaneseQuestion => {
-  const entry = pickByLevel(contentCache.kanji, level);
+  const kanjiSets: Record<typeof skill, typeof n5Kanji> = {
+    "kanji-n5": contentCache.kanjiN5,
+    "kanji-n4": contentCache.kanjiN4,
+    "kanji-n3": contentCache.kanjiN3,
+    "kanji-n2": contentCache.kanjiN2,
+    "kanji-n1": contentCache.kanjiN1,
+  };
+  const kanji = kanjiSets[skill];
+  const entry = pickByLevel(kanji, level);
   const useChoices = settings.inputMode === "multiple-choice" ||
     (settings.inputMode === "auto" && level <= 5);
   const choices = useChoices
     ? maybeShuffle(
         buildChoices(
           entry.reading,
-          contentCache.kanji.map((k) => k.reading)
+          kanji.map((k) => k.reading)
         )
       )
     : undefined;
   const acceptable = [normalizeToRomaji(entry.reading), entry.reading, entry.kanji];
   return {
     id: `kanji-${Date.now()}-${entry.id}`,
-    skill: "kanji-n5",
+    skill,
     level,
     prompt: "Reading?",
     display: entry.kanji,
@@ -421,24 +519,33 @@ const createKanjiQuestion = (
 };
 
 const createVocabQuestion = (
+  skill: "vocab-n5" | "vocab-n4" | "vocab-n3" | "vocab-n2" | "vocab-n1",
   level: number,
   settings: JapaneseSettings
 ): JapaneseQuestion => {
-  const entry = pickByLevel(contentCache.vocab, level);
+  const vocabSets: Record<typeof skill, typeof n5Vocab> = {
+    "vocab-n5": contentCache.vocabN5,
+    "vocab-n4": contentCache.vocabN4,
+    "vocab-n3": contentCache.vocabN3,
+    "vocab-n2": contentCache.vocabN2,
+    "vocab-n1": contentCache.vocabN1,
+  };
+  const vocab = vocabSets[skill];
+  const entry = pickByLevel(vocab, level);
   const useChoices = settings.inputMode === "multiple-choice" ||
     (settings.inputMode === "auto" && level <= 5);
   const choices = useChoices
     ? maybeShuffle(
         buildChoices(
           entry.meaning,
-          contentCache.vocab.map((v) => v.meaning)
+          vocab.map((v) => v.meaning)
         )
       )
     : undefined;
   const acceptable = [normalizeToRomaji(entry.reading), entry.reading, entry.term, entry.meaning.toLowerCase()];
   return {
     id: `vocab-${Date.now()}-${entry.id}`,
-    skill: "vocab-n5",
+    skill,
     level,
     prompt: "Meaning or reading?",
     display: entry.term,
@@ -453,7 +560,10 @@ const createVocabQuestion = (
 
 const sanitizeInput = (
   raw: string
-): string => normalizeAnswer(raw);
+): string => {
+  // Only trim and lowercase, don't convert yet (that happens in isCorrect)
+  return raw.trim().toLowerCase();
+};
 
 const parseInput = (value: string): AnswerParseResult<string> => {
   if (!value) {
@@ -504,10 +614,10 @@ export const japaneseTrainingProvider: TrainingProvider<
     if (skill === "hiragana" || skill === "katakana") {
       return createKanaQuestion(skill, level, settings);
     }
-    if (skill === "kanji-n5") {
-      return createKanjiQuestion(level, settings);
+    if (skill.startsWith("kanji-")) {
+      return createKanjiQuestion(skill as "kanji-n5" | "kanji-n4" | "kanji-n3" | "kanji-n2" | "kanji-n1", level, settings);
     }
-    return createVocabQuestion(level, settings);
+    return createVocabQuestion(skill as "vocab-n5" | "vocab-n4" | "vocab-n3" | "vocab-n2" | "vocab-n1", level, settings);
   },
   getQuestionText: (question) => question.prompt,
   updateStats: (stats, { skill, correct, elapsedMs }) =>

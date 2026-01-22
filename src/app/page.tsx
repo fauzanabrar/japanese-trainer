@@ -211,7 +211,11 @@ export default function Home() {
                   </div>
                 ) : null}
               </div>
-              <p className={styles.heroText}>{copy.menu.unlockNote}</p>
+              <div className={styles.metaBadge} style={{ marginTop: '8px' }}>
+                <span className={styles.metaBadgeText}>
+                  {copy.menu.unlockNote}
+                </span>
+              </div>
             </>
           ) : null}
         </section>
@@ -618,6 +622,36 @@ export default function Home() {
           const displayValue = control.formatValue
             ? control.formatValue(value, settings)
             : String(value);
+          
+          // Use button group for input mode, stepper for numeric values
+          if (control.id === "inputMode") {
+            const modes = ["auto", "multiple-choice", "typing"];
+            return (
+              <div key={control.id} className={styles.settingRow}>
+                <div className={styles.settingInfo}>
+                  <p className={styles.settingLabel}>{control.label}</p>
+                  {control.hint ? (
+                    <p className={styles.settingHint}>{control.hint}</p>
+                  ) : null}
+                </div>
+                <div className={styles.buttonGroup}>
+                  {modes.map((mode, idx) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => adjustSetting(control.id, idx - value)}
+                      className={`${styles.buttonGroupItem} ${
+                        value === idx ? styles.buttonGroupItemActive : ""
+                      }`}
+                    >
+                      {mode}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+          
           return (
             <div key={control.id} className={styles.settingRow}>
               <div className={styles.settingInfo}>

@@ -58,7 +58,7 @@ export const trainingConfig = {
       timeSuffix: "s per question",
       weakestPrefix: "Weakest:",
       inputModeLabel: "Input mode:",
-      unlockNote: "Unlock higher levels with 70% accuracy and 80% coverage.",
+      unlockNote: "✓ All N5 unlocked • N4-N1 unlock progressively at 70% accuracy + 80% coverage",
     },
     drill: {
       subtitle: "Answer quickly and accurately to level up.",
